@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane fx:id="root" maxHeight="600.0" maxWidth="1000.0" minHeight="300.0" minWidth="500.0" prefHeight="400.0"
+            prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.guness.CardRegistry.ui.Controller">
+    <center>
+        <StackPane BorderPane.alignment="CENTER">
+            <children>
+                <VBox alignment="TOP_CENTER" maxWidth="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0"
+                      spacing="10.0">
+                    <children>
+                        <TextField fx:id="accountNumberInput" promptText="Account Number"/>
+                        <ChoiceBox fx:id="bankChoiceBox" prefWidth="200.0"/>
+                        <Button fx:id="loadButton" mnemonicParsing="false" onAction="#onLoadCardClicked"
+                                prefWidth="120.0" text="Get Data"/>
+                        <Label fx:id="statusLabel" text="Ready" textFill="#464646"/>
+                    </children>
+                    <opaqueInsets>
+                        <Insets/>
+                    </opaqueInsets>
+                    <StackPane.margin>
+                        <Insets left="20.0" right="20.0" top="20.0"/>
+                    </StackPane.margin>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+    <top>
+        <AnchorPane prefHeight="80.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <children>
+                <StackPane layoutY="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                    <children>
+                        <Text strokeWidth="0.0" text="Trade Center" textAlignment="CENTER">
+                            <font>
+                                <Font size="40.0"/>
+                            </font>
+                        </Text>
+                    </children>
+                </StackPane>
+                <MenuBar prefHeight="29.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                         AnchorPane.topAnchor="0.0">
+                    <menus>
+                        <Menu mnemonicParsing="false" text="File">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#onSettingsClicked" text="Settings"/>
+                                <MenuItem mnemonicParsing="false" onAction="#onExitClicked" text="Exit"/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Edit">
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Help">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#onAboutClicked" text="About"/>
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+            </children>
+        </AnchorPane>
+    </top>
+    <bottom>
+        <GridPane BorderPane.alignment="CENTER">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints/>
+                <ColumnConstraints/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <children>
+                <AnchorPane prefHeight="30.0" prefWidth="200.0">
+                    <children>
+                        <Label text="Web Service :" AnchorPane.rightAnchor="6.0"/>
+                    </children>
+                </AnchorPane>
+                <AnchorPane prefHeight="30.0" prefWidth="200.0" GridPane.columnIndex="1">
+                    <children>
+                        <Label text="52.28.91.8/CardApi.svc" AnchorPane.leftAnchor="6.0"/>
+                    </children>
+                </AnchorPane>
+            </children>
+        </GridPane>
+    </bottom>
+</BorderPane>
