@@ -1,19 +1,21 @@
 package com.guness.CardRegistery;
 
+import com.guness.CardRegistery.core.Constants;
+import com.guness.CardRegistery.util.ReadWriteUtils;
 import javafx.fxml.Initializable;
 import org.nfctools.NfcAdapter;
 import org.nfctools.api.TagScannerListener;
-import org.nfctools.mf.MfLoginException;
-import org.nfctools.mf.block.MfBlock;
-import org.nfctools.mf.classic.*;
+import org.nfctools.mf.classic.MfClassicReaderWriter;
 import org.nfctools.mf.tools.AbstractCardTool;
 import org.nfctools.scio.Terminal;
 import org.nfctools.scio.TerminalMode;
 import org.nfctools.utils.LoggingUnknownTagListener;
-import org.nfctools.utils.NfcUtils;
 
+import javax.smartcardio.CardException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class Controller implements TagScannerListener, Initializable {
@@ -31,23 +33,11 @@ public class Controller implements TagScannerListener, Initializable {
         nfcAdapter.registerTagListener(new AbstractCardTool() {
             @Override
             public void doWithReaderWriter(MfClassicReaderWriter readerWriter) throws IOException {
-                MemoryLayout memoryLayout = readerWriter.getMemoryLayout();
 
-                for (int sectorId = 0; sectorId < memoryLayout.getSectors(); sectorId++) {
-                    for (byte[] key : knownKeys) {
-                        try {
-                            MfClassicAccess access = new MfClassicAccess(new KeyValue(Key.A, key), sectorId, 0,
-                                    memoryLayout.getBlocksPerSector(sectorId));
-                            MfBlock[] mfBlock = readerWriter.readBlock(access);
-                            for (int blockId = 0; blockId < mfBlock.length; blockId++) {
-                                System.out.println("S" + sectorId + "|B" + blockId + " Key: " + NfcUtils.convertBinToASCII(key)
-                                        + " " + mfBlock[blockId]);
-                            }
-                            break;
-                        } catch (MfLoginException e) {
-                            log.info("Cannot read sector: " + sectorId + " with key " + NfcUtils.convertBinToASCII(key));
-                        }
-                    }
+                try {
+                    ReadWriteUtils.dumpMifareClassic1KBlock(readerWriter, 0, 0, new ArrayList<>(knownKeys));
+                } catch (CardException e) {
+                    log.error("Cannot read sector: " + Constants.SECTOR_ID + " with keys " + Arrays.toString(knownKeys.toArray()));
                 }
             }
         });
