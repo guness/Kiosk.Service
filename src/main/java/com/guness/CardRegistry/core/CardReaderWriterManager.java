@@ -12,7 +12,6 @@ import org.nfctools.mf.tools.AbstractCardTool;
 import org.nfctools.scio.Terminal;
 import org.nfctools.scio.TerminalMode;
 import org.nfctools.utils.LoggingUnknownTagListener;
-import org.nfctools.utils.NfcUtils;
 
 import javax.smartcardio.CardException;
 import javax.xml.rpc.ServiceException;
@@ -53,10 +52,10 @@ public class CardReaderWriterManager implements TagScannerListener {
         NfcAdapter nfcAdapter = new NfcAdapter(nfcReaderWriter, TerminalMode.INITIATOR, this);
         nfcAdapter.registerUnknownTagListerner(new LoggingUnknownTagListener());
         nfcAdapter.startListening();
+
         nfcAdapter.registerTagListener(new AbstractCardTool() {
             @Override
             public void doWithReaderWriter(MfClassicReaderWriter readerWriter) throws IOException {
-
                 if (cardModel != null) try {
                     boolean numberSuccess = ReadWriteUtils.writeToMifareClassic1KCard(readerWriter, NUMBER_SECTOR_ID, NUMBER_BLOCK_ID, CARD_KEY, completeBlock(cardModel.getNumber()));
                     boolean secretSuccess = ReadWriteUtils.writeToMifareClassic1KCard(readerWriter, SECRET_SECTOR_ID, SECRET_BLOCK_ID, CARD_KEY, completeBlock(cardModel.getSecret()));
@@ -82,17 +81,17 @@ public class CardReaderWriterManager implements TagScannerListener {
 
     @Override
     public void onScanningEnded() {
-
+        System.currentTimeMillis();
     }
 
     @Override
     public void onScanningFailed(Throwable throwable) {
-
+        System.currentTimeMillis();
     }
 
     @Override
     public void onTagHandingFailed(Throwable throwable) {
-
+        System.currentTimeMillis();
     }
 
     public interface CardWriteListener {

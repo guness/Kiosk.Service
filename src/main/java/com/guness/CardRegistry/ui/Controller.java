@@ -8,14 +8,17 @@ import com.guness.CardRegistry.model.CardModel;
 import com.guness.CardRegistry.ws.CardServiceResponse;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.WindowEvent;
-import org.nfctools.api.TagScannerListener;
 
 import java.rmi.RemoteException;
 
-public class Controller implements TagScannerListener {
+public class Controller {
 
     @FXML
     public BorderPane root;
@@ -32,23 +35,24 @@ public class Controller implements TagScannerListener {
     @FXML
     public Label statusLabel;
 
+    @FXML
+    public GridPane userInfoPane;
+
+    @FXML
+    public Label nameLabel;
+
+    @FXML
+    public Label lastNameLabel;
+
+    @FXML
+    public Label cardNumberLabel;
+
     public Controller() {
     }
 
     @FXML
     private void initialize() {
         bankChoiceBox.setItems(DataManager.getInstance().getBankModelList());
-    }
-
-    public void onScanningEnded() {
-    }
-
-    public void onScanningFailed(Throwable throwable) {
-
-    }
-
-    public void onTagHandingFailed(Throwable throwable) {
-
     }
 
     @FXML
@@ -66,13 +70,14 @@ public class Controller implements TagScannerListener {
 
     @FXML
     public void onLoadCardClicked() {
+        userInfoPane.setVisible(false);
         statusLabel.setText("Loading...");
         loadButton.setDisable(true);
 
 
-        Task task = new Task<Void>() {
+        Task<CardServiceResponse> task = new Task<CardServiceResponse>() {
             @Override
-            public Void call() throws RemoteException, IllegalAccessException {
+            public CardServiceResponse call() throws RemoteException, IllegalAccessException {
                 String accountNumber = accountNumberInput.getText();
                 BankModel bankModel = bankChoiceBox.getValue();
                 CardServiceResponse response = WebServiceManager.getInstance().retrieveCardData(accountNumber, bankModel.getId());
@@ -81,6 +86,12 @@ public class Controller implements TagScannerListener {
                     public void onSuccess() {
                         statusLabel.setText("Success");
                         loadButton.setDisable(false);
+                        nameLabel.setText(response.getCustomer().getFirstname());
+                        lastNameLabel.setText(response.getCustomer().getLastname());
+                        String number = response.getCard().getNumber();
+                        number = number.substring(0, 4) + " " + number.substring(4, 8) + " " + number.substring(8, 12) + " " + number.substring(12, number.length());
+                        cardNumberLabel.setText(number);
+                        userInfoPane.setVisible(true);
                     }
 
                     @Override
@@ -89,11 +100,9 @@ public class Controller implements TagScannerListener {
                         loadButton.setDisable(false);
                     }
                 });
-                return null;
+                return response;
             }
         };
-        ProgressBar bar = new ProgressBar();
-        bar.progressProperty().bind(task.progressProperty());
         task.setOnSucceeded(event -> statusLabel.setText("Ready for Card Write"));
         task.setOnFailed(event -> {
             statusLabel.setText("Service Failed");
