@@ -131,7 +131,7 @@
                 </AnchorPane>
                 <AnchorPane prefHeight="30.0" prefWidth="200.0" GridPane.columnIndex="1">
                     <children>
-                        <Label text="52.28.91.8/CardApi.svc" AnchorPane.leftAnchor="6.0"/>
+                        <Label text="http://52.28.91.8:9091" AnchorPane.leftAnchor="6.0"/>
                     </children>
                 </AnchorPane>
             </children>

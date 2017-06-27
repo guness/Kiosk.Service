@@ -2,11 +2,12 @@ package com.guness.CardRegistry.ui;
 
 import com.guness.CardRegistry.core.CardReaderWriterManager;
 import com.guness.CardRegistry.core.DataManager;
-import com.guness.CardRegistry.core.WebServiceManager;
 import com.guness.CardRegistry.model.BankModel;
 import com.guness.CardRegistry.model.CardModel;
-import com.guness.CardRegistry.ws.CardServiceResponse;
-import javafx.concurrent.Task;
+import com.guness.CardRegistry.util.JavaFxScheduler;
+import com.guness.kiosk.webservice.manager.WebServiceManager;
+import com.guness.kiosk.webservice.network.RetrieveResponse;
+import io.reactivex.schedulers.Schedulers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -15,8 +16,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.WindowEvent;
-
-import java.rmi.RemoteException;
 
 public class Controller {
 
@@ -74,40 +73,55 @@ public class Controller {
         statusLabel.setText("Loading...");
         loadButton.setDisable(true);
 
+        final String accountNumber = accountNumberInput.getText();
+        final BankModel bankModel = bankChoiceBox.getValue();
 
-        Task<CardServiceResponse> task = new Task<CardServiceResponse>() {
-            @Override
-            public CardServiceResponse call() throws RemoteException, IllegalAccessException {
-                String accountNumber = accountNumberInput.getText();
-                BankModel bankModel = bankChoiceBox.getValue();
-                CardServiceResponse response = WebServiceManager.getInstance().retrieveCardData(accountNumber, bankModel.getId());
-                CardReaderWriterManager.getInstance().setCardModel(CardModel.fromCardData(response.getCard()), new CardReaderWriterManager.CardWriteListener() {
-                    @Override
-                    public void onSuccess() {
-                        statusLabel.setText("Success");
-                        loadButton.setDisable(false);
-                        nameLabel.setText(response.getCustomer().getFirstname());
-                        lastNameLabel.setText(response.getCustomer().getLastname());
-                        String number = response.getCard().getNumber();
-                        number = number.substring(0, 4) + " " + number.substring(4, 8) + " " + number.substring(8, 12) + " " + number.substring(12, number.length());
-                        cardNumberLabel.setText(number);
-                        userInfoPane.setVisible(true);
-                    }
 
-                    @Override
-                    public void onFail() {
-                        statusLabel.setText("Card Failed");
-                        loadButton.setDisable(false);
-                    }
+        WebServiceManager.getInstance().retrieveCard(bankModel.getId(), accountNumber)
+                .observeOn(JavaFxScheduler.platform())
+                .subscribeOn(Schedulers.io())
+                .subscribe(retrieveResponse -> {
+                    statusLabel.setText("Ready for Card Write");
+                    CardModel cardModel = CardModel.fromCard(retrieveResponse.Card);
+                    String RFID = cardModel.getRFID();
+                    CardReaderWriterManager.getInstance().setCardModel(cardModel, new CardReaderWriterManager.CardWriteListener() {
+                        @Override
+                        public void onSuccess() {
+                            if (RFID != null && RFID.equals(cardModel.getRFID())) {
+                                onCardRegistryCompleted(retrieveResponse);
+                            } else {
+                                WebServiceManager.getInstance().updateCard(cardModel.getNumber(), cardModel.getRFID())
+                                        .observeOn(JavaFxScheduler.platform())
+                                        .subscribeOn(Schedulers.io())
+                                        .subscribe(updateResponse -> onCardRegistryCompleted(retrieveResponse), throwable -> {
+                                            throwable.printStackTrace();
+                                            statusLabel.setText("Service Failed");
+                                            loadButton.setDisable(false);
+                                        });
+                            }
+                        }
+
+                        @Override
+                        public void onFail() {
+                            statusLabel.setText("Card Failed");
+                            loadButton.setDisable(false);
+                        }
+                    });
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    statusLabel.setText("Service Failed");
+                    loadButton.setDisable(false);
                 });
-                return response;
-            }
-        };
-        task.setOnSucceeded(event -> statusLabel.setText("Ready for Card Write"));
-        task.setOnFailed(event -> {
-            statusLabel.setText("Service Failed");
-            loadButton.setDisable(false);
-        });
-        new Thread(task).start();
+    }
+
+    private void onCardRegistryCompleted(RetrieveResponse retrieveResponse) {
+        statusLabel.setText("Success");
+        loadButton.setDisable(false);
+        nameLabel.setText(retrieveResponse.Customer.Firstname);
+        lastNameLabel.setText(retrieveResponse.Customer.Lastname);
+        String number = retrieveResponse.Card.Number;
+        number = number.substring(0, 4) + " " + number.substring(4, 8) + " " + number.substring(8, 12) + " " + number.substring(12, number.length());
+        cardNumberLabel.setText(number);
+        userInfoPane.setVisible(true);
     }
 }

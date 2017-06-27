@@ -14,7 +14,6 @@ import org.nfctools.scio.TerminalMode;
 import org.nfctools.utils.LoggingUnknownTagListener;
 
 import javax.smartcardio.CardException;
-import javax.xml.rpc.ServiceException;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -38,7 +37,7 @@ public class CardReaderWriterManager implements TagScannerListener {
     private CardReaderWriterManager() {
     }
 
-    public void init() throws IOException, ServiceException {
+    public void init() throws IOException {
         startListening();
     }
 
@@ -47,7 +46,7 @@ public class CardReaderWriterManager implements TagScannerListener {
         this.listener = listener;
     }
 
-    private void startListening() throws IOException, ServiceException {
+    private void startListening() throws IOException {
         final Terminal nfcReaderWriter = TerminalUtils.getAvailableTerminal();
         NfcAdapter nfcAdapter = new NfcAdapter(nfcReaderWriter, TerminalMode.INITIATOR, this);
         nfcAdapter.registerUnknownTagListerner(new LoggingUnknownTagListener());
@@ -60,6 +59,9 @@ public class CardReaderWriterManager implements TagScannerListener {
                     boolean numberSuccess = ReadWriteUtils.writeToMifareClassic1KCard(readerWriter, NUMBER_SECTOR_ID, NUMBER_BLOCK_ID, CARD_KEY, completeBlock(cardModel.getNumber()));
                     boolean secretSuccess = ReadWriteUtils.writeToMifareClassic1KCard(readerWriter, SECRET_SECTOR_ID, SECRET_BLOCK_ID, CARD_KEY, completeBlock(cardModel.getSecret()));
                     final boolean success = numberSuccess && secretSuccess;
+                    if (success) {
+                        cardModel.setRFID(ReadWriteUtils.readMifareClassic1KBlock(readerWriter, RFID_SECTOR_ID, RFID_BLOCK_ID, CARD_KEY));
+                    }
                     Platform.runLater(() -> {
                         if (success) {
                             listener.onSuccess();
@@ -75,8 +77,6 @@ public class CardReaderWriterManager implements TagScannerListener {
                 }
             }
         });
-
-        System.currentTimeMillis();
     }
 
     @Override

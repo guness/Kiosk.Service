@@ -1,23 +1,25 @@
 package com.guness.CardRegistry.model;
 
-import com.guness.CardRegistry.ws.CardData;
+import com.guness.kiosk.webservice.model.Card;
 
 /**
  * Created by guness on 15/06/2017.
  */
 public class CardModel {
     private String ID;
+    private String RFID;
     private String secret;
     private String number;
 
-    public CardModel(String ID, String secret, String number) {
+    public CardModel(String RFID, String ID, String secret, String number) {
+        this.RFID = RFID;
         this.ID = ID;
         this.secret = secret;
         this.number = number;
     }
 
-    public static CardModel fromCardData(CardData data) {
-        return new CardModel(data.getId(), data.getSecret(), data.getNumber());
+    public static CardModel fromCard(Card card) {
+        return new CardModel(card.RFID, card.Id, card.Secret, card.Number);
     }
 
     public String getID() {
@@ -42,5 +44,13 @@ public class CardModel {
 
     public void setNumber(String number) {
         this.number = number;
+    }
+
+    public String getRFID() {
+        return RFID;
+    }
+
+    public void setRFID(String RFID) {
+        this.RFID = RFID;
     }
 }
