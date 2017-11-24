@@ -20,8 +20,10 @@ public class DataManager {
     }
 
     public void init() {
-        bankModelList.add(new BankModel("BMFN", "A53AAFB2-4D02-4B84-9807-17C124256518"));
-        bankModelList.add(new BankModel("IRON FX", "7BE9E2EE-E0AD-4B07-95EE-A8F213FBC144"));
+        bankModelList.setAll(
+                new BankModel("BMFN", "A53AAFB2-4D02-4B84-9807-17C124256518"),
+                new BankModel("IRON FX", "7BE9E2EE-E0AD-4B07-95EE-A8F213FBC144"),
+                new BankModel("FXGIANTS", "96E753A0-6082-4E5D-BFEF-D051F09AC613"));
     }
 
     public ObservableList<BankModel> getBankModelList() {
