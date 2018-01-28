@@ -47,7 +47,7 @@
     </properties>
     <groupId>com.guness</groupId>
     <artifactId>CardRegistery</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
 
     <dependencies>
 
